@@ -28,7 +28,8 @@ if (cluster.isPrimary) {
     CREATE TABLE IF NOT EXISTS messages (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       client_offset TEXT UNIQUE,
-      content TEXT
+      content TEXT,
+      created_at INTEGER
     );
   `);
 
@@ -49,7 +50,7 @@ if (cluster.isPrimary) {
     socket.on('chat message', async (msg, clientOffset, callback) => {
       let result;
       try {
-        result = await db.run('INSERT INTO messages (content, client_offset) VALUES (?, ?)', msg, clientOffset);
+        result = await db.run('INSERT INTO messages (content, client_offset, created_at) VALUES (?, ?)', msg, clientOffset, Date.now());
       } catch (e) {
         if (e.errno === 19 /* SQLITE_CONSTRAINT */ ) {
           callback();
